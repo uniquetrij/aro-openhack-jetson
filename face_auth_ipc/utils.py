@@ -20,7 +20,7 @@ BOOTSTRAP_SERVERS = os.getenv('KAFKA_BS_URL',
                               'kf-cluster-kafka-bootstrap-loremipsum.apps.i0xha38k.eastus.aroapp.io:443')
 ADMISSION_TOPIC = os.getenv('KAFKA_TOPIC_ADMISSION',
                             'test')
-KAFKA_PRODUCER = KafkaProducer(bootstrap_servers=BOOTSTRAP_SERVERS, ssl_cafile='../ca.crt', security_protocol="SSL")
+KAFKA_PRODUCER = KafkaProducer(bootstrap_servers=BOOTSTRAP_SERVERS, ssl_cafile='./ca.crt', security_protocol="SSL")
 
 
 def allow_admission(identity):
@@ -69,6 +69,8 @@ def get_encodings():
 
 
 def find_valid_encoding_identity(encoding):
+    if not encoding:
+        return None
     keys, encs = get_encodings()
     matches = face_recognition.compare_faces(encs, encoding)
     matches = set([x for x, y in zip(keys, matches) if y])
