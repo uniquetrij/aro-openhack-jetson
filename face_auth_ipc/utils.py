@@ -25,12 +25,12 @@ KAFKA_PRODUCER = KafkaProducer(bootstrap_servers=BOOTSTRAP_SERVERS, ssl_cafile='
 
 def allow_admission(identity):
     def on_success(record_metadata, msg):
-        logging.log(logging.INFO, record_metadata)
-        logging.log(logging.INFO, msg)
+        print(record_metadata)
+        print(msg)
 
     def on_error(exerr, message):
-        logging.log(logging.INFO, exerr)
-        logging.log(logging.INFO, message)
+        print(exerr)
+        print(message)
 
     message = {
         'type': 'allow_admission',
@@ -69,7 +69,7 @@ def get_encodings():
 
 
 def find_valid_encoding_identity(encoding):
-    if not encoding:
+    if encoding is None:
         return None
     keys, encs = get_encodings()
     matches = face_recognition.compare_faces(encs, encoding)

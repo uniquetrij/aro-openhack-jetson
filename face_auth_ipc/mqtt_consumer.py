@@ -1,12 +1,9 @@
-import os
-import pickle
+import json
 import random
 import threading
-from threading import Thread
-from time import sleep
 
+import requests
 from paho.mqtt import client as mqtt_client
-import json
 
 broker = 'puffin.rmq2.cloudamqp.com'
 port = 1883
@@ -31,7 +28,12 @@ def connect_mqtt() -> mqtt_client:
     return client
 
 
-def is_iotdev_enabled(id):
+def is_iotdev_enabled(id: str):
+    # url = "http://quarkus-backend-loremipsum.apps.i0xha38k.eastus.aroapp.io/api/configuration/" + requests.utils.quote(id)
+    # try:
+    #     return requests.get(url).json()['enabled']
+    # except:
+    #     return False
     return True
 
 
@@ -69,3 +71,7 @@ def subscribe(client: mqtt_client, lock: threading.Lock, id, requests=None):
 
     client.subscribe(topic)
     client.on_message = on_message
+
+
+if __name__ == '__main__':
+    is_iotdev_enabled('7b:ed:b4:d3:4d:34')
