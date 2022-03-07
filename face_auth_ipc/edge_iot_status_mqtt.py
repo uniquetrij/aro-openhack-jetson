@@ -1,9 +1,12 @@
 import json
+import os
 import random
 import threading
 
 import requests
 from paho.mqtt import client as mqtt_client
+
+STATUS_CONFIG_URL = os.getenv('STATUS_CONFIG_URL', 'http://quarkus-backend-loremipsum.apps.i0xha38k.eastus.aroapp.io/api/configuration/')
 
 broker = 'puffin.rmq2.cloudamqp.com'
 port = 1883
@@ -29,43 +32,50 @@ def connect_mqtt() -> mqtt_client:
 
 
 def is_iotdev_enabled(id: str):
-    # url = "http://quarkus-backend-loremipsum.apps.i0xha38k.eastus.aroapp.io/api/configuration/" + requests.utils.quote(id)
+    # url = STATUS_CONFIG_URL + requests.utils.quote(id)
+    # print(url)
     # try:
-    #     return requests.get(url).json()['enabled']
-    # except:
+    #     response = requests.get(url).json()
+    #     print(json.dumps(response, indent=1))
+    #     return response['enabled']
+    # except Exception as e:
+    #     print(e)
     #     return False
     return True
 
 
-def subscribe(client: mqtt_client, lock: threading.Lock, id, requests=None):
+def subscribe(client: mqtt_client, lock: threading.Lock, id):
     def on_message(client, userdata, msg):
         temp = json.loads(msg.payload.decode())
+
+        #HERE IS A BIG BUG!!!
+
         print(temp["enabled"])
         print(temp["deviceIdentifier"])
         print({temp["deviceIdentifier"]: temp["enabled"]}[id])
         if {temp["deviceIdentifier"]: temp["enabled"]}[id]:
             try:
                 lock.release()
-                print("DEVICE ENABLED")
+                print("DEVICE ENABLED BY MQTT")
             except:
                 pass
         else:
             try:
                 lock.acquire(blocking=True)
-                print("DEVICE DISABLED")
+                print("DEVICE DISABLED BY MQTT")
             except:
                 pass
 
     if is_iotdev_enabled(id):
         try:
             lock.release()
-            print("DEVICE ENABLED")
+            print("DEVICE ENABLED BY STATUS")
         except:
             pass
     else:
         try:
             lock.acquire(blocking=True)
-            print("DEVICE DISABLED")
+            print("DEVICE DISABLED BY STATUS")
         except:
             pass
 
@@ -74,4 +84,4 @@ def subscribe(client: mqtt_client, lock: threading.Lock, id, requests=None):
 
 
 if __name__ == '__main__':
-    is_iotdev_enabled('7b:ed:b4:d3:4d:34')
+    print(is_iotdev_enabled('7b:ed:b4:d3:4d:34'))
